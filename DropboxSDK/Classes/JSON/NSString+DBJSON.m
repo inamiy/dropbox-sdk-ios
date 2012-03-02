@@ -1,5 +1,5 @@
 /*
- Copyright (C) 2009 Stig Brautaset. All rights reserved.
+ Copyright (C) 2007-2009 Stig Brautaset. All rights reserved.
  
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
@@ -27,42 +27,34 @@
  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#import <Foundation/Foundation.h>
+#import "NSString+DBJSON.h"
+#import "DBJsonParser.h"
+
+#import "DBDefines.h"
 
 
-/**
- @brief Adds JSON generation to Foundation classes
- 
- This is a category on NSObject that adds methods for returning JSON representations
- of standard objects to the objects themselves. This means you can call the
- -JSONRepresentation method on an NSArray object and it'll do what you want.
- */
-@interface NSObject (NSObject_SBJSON)
+@implementation NSString (NSString_DBJSON)
 
-/**
- @brief Returns a string containing the receiver encoded as a JSON fragment.
- 
- This method is added as a category on NSObject but is only actually
- supported for the following objects:
- @li NSDictionary
- @li NSArray
- @li NSString
- @li NSNumber (also used for booleans)
- @li NSNull 
- 
- @deprecated Given we bill ourselves as a "strict" JSON library, this method should be removed.
- */
-- (NSString *)JSONFragment;
+- (id)JSONFragmentValue
+{
+    DBJsonParser *jsonParser = [DBJsonParser new];    
+    id repr = [jsonParser fragmentWithString:self];    
+    if (!repr)
+        NSLog(@"-JSONFragmentValue failed. Error trace is: %@", [jsonParser errorTrace]);
+    [jsonParser release];
+    return repr;
+}
 
-/**
- @brief Returns a string containing the receiver encoded in JSON.
-
- This method is added as a category on NSObject but is only actually
- supported for the following objects:
- @li NSDictionary
- @li NSArray
- */
-- (NSString *)JSONRepresentation;
+- (id)JSONValue
+{
+    DBJsonParser *jsonParser = [DBJsonParser new];
+    id repr = [jsonParser objectWithString:self];
+    if (!repr)
+        NSLog(@"-JSONValue failed. Error trace is: %@", [jsonParser errorTrace]);
+    [jsonParser release];
+    return repr;
+}
 
 @end
 
+DB_FIX_CATEGORY_BUG(NSString_DBJSON)
